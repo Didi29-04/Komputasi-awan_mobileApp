@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkinss
+    user: root
+    ports:
+      - "8082:8080"
+      - "50001:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+    restart: unless-stopped
+
+  android-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: android-builder1
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    command: tail -f /dev/null
+    depends_on:
+      - jenkins
+    restart: "no"
+
+volumes:
+  jenkins_home:
